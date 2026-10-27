@@ -1,0 +1,13 @@
+/* scenarios.js: ready-made practice scenarios and the load() function that builds each one by running real commands */
+/* ---------- scenarios ---------- */
+const SC=[
+{n:'Fast-forward merge',h:'Run git merge feature. main has no new commits, so Git only moves the pointer.',s:['@app.py=print("v1")','git commit -m "init app"','git switch -c feature','@app.py=print("v1")\nprint("feature output")','git commit -m "add feature output"','git switch main']},
+{n:'Clean three-way merge',h:'Run git merge feature. The branches changed different functions, so Git combines them.',s:['@lib.py=def add(a, b):\n    return a + b\n\ndef sub(a, b):\n    return a - b','git commit -m "init lib"','git switch -c feature','@lib.py=def add(a, b):\n    return float(a) + b\n\ndef sub(a, b):\n    return a - b','git commit -m "feature: float add"','git switch main','@lib.py=def add(a, b):\n    return a + b\n\ndef sub(a, b):\n    return abs(a - b)','git commit -m "main: abs sub"']},
+{n:'Content conflict',h:'Run git merge feature, resolve the conflict in config.ini, then git commit.',s:['@config.ini=[server]\nhost = localhost\nport = 8080\ntimeout = 30','git commit -m "initial config"','git switch -c feature','@config.ini=[server]\nhost = localhost\nport = 8443\ntimeout = 60','git commit -m "feature: tls port, longer timeout"','git switch main','@config.ini=[server]\nhost = localhost\nport = 9000\ntimeout = 30','git commit -m "main: move to port 9000"']},
+{n:'Multi-file: conflicts + delete',h:'Merge feature. app.py is edit/edit, legacy.txt is modify/delete, README merges cleanly.',s:['@app.py=def main():\n    print("hi")\n\nmain()','@README.md=# Demo\n\nversion: 1\n\nlicense: MIT','@legacy.txt=remove me\nlegacy','git commit -m "initial project"','git switch -c feature','@app.py=def main():\n    print("hey")\n\nmain()','@README.md=# Demo\n\nversion: 1\n\nlicense: Apache-2.0','rm legacy.txt','git commit -m "feature: relicense, drop legacy"','git switch main','@app.py=def main():\n    print("hello")\n\nmain()','@README.md=# Demo\n\nversion: 2\n\nlicense: MIT','@legacy.txt=remove me\nlegacy v2','git commit -m "main: v2 changes"']}
+];
+SC.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.n;$('scn').appendChild(o)});
+function load(i){fresh();$('log').innerHTML='';
+ SC[i].s.forEach(x=>{if(x[0]==='@'){const k=x.indexOf('=');R.work[x.slice(1,k)]=x.slice(k+1);R.cur=x.slice(1,k);out('# edit '+x.slice(1,k),'mute')}else run(x)});
+ $('hint').textContent='Goal: '+SC[i].h;R.cur=Object.keys(R.work)[0];render()}
+$('scn').onchange=e=>load(+e.target.value);$('reset').onclick=()=>load(+$('scn').value);
